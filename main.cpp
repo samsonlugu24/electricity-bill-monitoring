@@ -6,7 +6,8 @@
 using namespace std;
 
 const int MAX = 100;
-const string FILE_NAME = "appliances.txt";
+const string APPLIANCE_FILE = "appliances.txt";
+const string BILLING_FILE = "billing_summary.txt";
 
 struct Appliance {
     string name;
@@ -19,7 +20,7 @@ double calculateKwh(double watts, double hours) {
 }
 
 void saveFile(Appliance list[], int count) {
-    ofstream file(FILE_NAME);
+    ofstream file(APPLIANCE_FILE);
     for (int i = 0; i < count; i++) {
         file << list[i].name << "|"
              << list[i].watts << "|"
@@ -30,7 +31,7 @@ void saveFile(Appliance list[], int count) {
 
 void loadFile(Appliance list[], int &count) {
     count = 0;
-    ifstream file(FILE_NAME);
+    ifstream file(APPLIANCE_FILE);
     if (!file) return;
 
     string line;
@@ -94,12 +95,28 @@ void viewAppliances(Appliance list[], int count) {
     }
 }
 
-void deleteAppliance(Appliance list[], int &count) {
-    if (count == 0) {
-        cout << "No appliances to delete.\n";
-        return;
+void searchAppliance(Appliance list[], int count) {
+    cin.ignore();
+    string search;
+    cout << "Enter name to search: ";
+    getline(cin, search);
+
+    bool found = false;
+
+    for (int i = 0; i < count; i++) {
+        if (list[i].name.find(search) != string::npos) {
+            cout << list[i].name << " | "
+                 << calculateKwh(list[i].watts, list[i].hours)
+                 << " kWh/day\n";
+            found = true;
+        }
     }
 
+    if (!found)
+        cout << "Appliance not found.\n";
+}
+
+void deleteAppliance(Appliance list[], int &count) {
     viewAppliances(list, count);
 
     int num;
@@ -122,11 +139,6 @@ void deleteAppliance(Appliance list[], int &count) {
 }
 
 void editAppliance(Appliance list[], int count) {
-    if (count == 0) {
-        cout << "No appliances to edit.\n";
-        return;
-    }
-
     viewAppliances(list, count);
 
     int num;
@@ -153,6 +165,43 @@ void editAppliance(Appliance list[], int count) {
     cout << "Appliance updated.\n";
 }
 
+void billing(Appliance list[], int count) {
+    double tariff;
+    cout << "Enter tariff per kWh: ";
+    cin >> tariff;
+
+    double totalDay = 0;
+    for (int i = 0; i < count; i++)
+        totalDay += calculateKwh(list[i].watts, list[i].hours);
+
+    double totalMonth = totalDay * 30;
+    double costDay = totalDay * tariff;
+    double costMonth = totalMonth * tariff;
+
+    cout << fixed << setprecision(2);
+    cout << "\nDaily Energy: " << totalDay << " kWh\n";
+    cout << "Monthly Energy: " << totalMonth << " kWh\n";
+    cout << "Daily Cost: " << costDay << "\n";
+    cout << "Monthly Cost: " << costMonth << "\n";
+
+    cout << "Save billing summary? (y/n): ";
+    char choice;
+    cin >> choice;
+
+    if (choice == 'y' || choice == 'Y') {
+        ofstream file(BILLING_FILE, ios::app);
+
+        file << "Daily kWh: " << totalDay << "\n";
+        file << "Monthly kWh: " << totalMonth << "\n";
+        file << "Daily Cost: " << costDay << "\n";
+        file << "Monthly Cost: " << costMonth << "\n";
+        file << "------------------------\n";
+
+        file.close();
+        cout << "Billing summary saved.\n";
+    }
+}
+
 int main() {
     Appliance list[MAX];
     int count = 0;
@@ -164,9 +213,11 @@ int main() {
         cout << "\n==== Electrical Load Monitoring ====\n";
         cout << "1. Add Appliance\n";
         cout << "2. View Appliances\n";
-        cout << "3. Delete Appliance\n";
-        cout << "4. Edit Appliance\n";
-        cout << "5. Exit\n";
+        cout << "3. Search Appliance\n";
+        cout << "4. Delete Appliance\n";
+        cout << "5. Edit Appliance\n";
+        cout << "6. Billing\n";
+        cout << "7. Exit\n";
         cout << "Choose: ";
         cin >> option;
 
@@ -175,15 +226,19 @@ int main() {
         else if (option == 2)
             viewAppliances(list, count);
         else if (option == 3)
-            deleteAppliance(list, count);
+            searchAppliance(list, count);
         else if (option == 4)
-            editAppliance(list, count);
+            deleteAppliance(list, count);
         else if (option == 5)
+            editAppliance(list, count);
+        else if (option == 6)
+            billing(list, count);
+        else if (option == 7)
             cout << "Goodbye.\n";
         else
             cout << "Invalid option.\n";
 
-    } while (option != 5);
+    } while (option != 7);
 
     return 0;
 }
