@@ -61,6 +61,33 @@ void viewAppliances(Appliance list[], int count) {
     }
 }
 
+void searchAppliance(Appliance list[], int count) {
+    if (count == 0) {
+        cout << "No appliances available.\n";
+        return;
+    }
+
+    cin.ignore();
+
+    string search;
+    cout << "Enter name to search: ";
+    getline(cin, search);
+
+    bool found = false;
+
+    for (int i = 0; i < count; i++) {
+        if (list[i].name.find(search) != string::npos) {
+            cout << list[i].name << " - "
+                 << calculateKwh(list[i].watts, list[i].hours)
+                 << " kWh/day\n";
+            found = true;
+        }
+    }
+
+    if (!found)
+        cout << "Appliance not found.\n";
+}
+
 void billing(Appliance list[], int count) {
     if (count == 0) {
         cout << "No appliances available.\n";
@@ -95,8 +122,9 @@ int main() {
         cout << "\n=== Electrical Load Monitoring ===\n";
         cout << "1. Add Appliance\n";
         cout << "2. View Appliances\n";
-        cout << "3. Billing\n";
-        cout << "4. Exit\n";
+        cout << "3. Search Appliance\n";
+        cout << "4. Billing\n";
+        cout << "5. Exit\n";
         cout << "Choose: ";
         cin >> option;
 
@@ -105,13 +133,15 @@ int main() {
         else if (option == 2)
             viewAppliances(list, count);
         else if (option == 3)
-            billing(list, count);
+            searchAppliance(list, count);
         else if (option == 4)
+            billing(list, count);
+        else if (option == 5)
             cout << "Goodbye.\n";
         else
             cout << "Invalid option.\n";
 
-    } while (option != 4);
+    } while (option != 5);
 
     return 0;
 }
