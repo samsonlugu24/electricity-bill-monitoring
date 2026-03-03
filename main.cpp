@@ -6,8 +6,7 @@
 using namespace std;
 
 const int MAX = 100;
-const string APPLIANCE_FILE = "appliances.txt";
-const string BILLING_FILE = "billing_summary.txt";
+const string FILE_NAME = "appliances.txt";
 
 struct Appliance {
     string name;
@@ -20,7 +19,7 @@ double calculateKwh(double watts, double hours) {
 }
 
 void saveFile(Appliance list[], int count) {
-    ofstream file(APPLIANCE_FILE);
+    ofstream file(FILE_NAME);
     for (int i = 0; i < count; i++) {
         file << list[i].name << "|"
              << list[i].watts << "|"
@@ -31,7 +30,7 @@ void saveFile(Appliance list[], int count) {
 
 void loadFile(Appliance list[], int &count) {
     count = 0;
-    ifstream file(APPLIANCE_FILE);
+    ifstream file(FILE_NAME);
     if (!file) return;
 
     string line;
@@ -122,6 +121,38 @@ void deleteAppliance(Appliance list[], int &count) {
     cout << "Appliance deleted.\n";
 }
 
+void editAppliance(Appliance list[], int count) {
+    if (count == 0) {
+        cout << "No appliances to edit.\n";
+        return;
+    }
+
+    viewAppliances(list, count);
+
+    int num;
+    cout << "Enter appliance number to edit: ";
+    cin >> num;
+
+    if (num < 1 || num > count) {
+        cout << "Invalid number.\n";
+        return;
+    }
+
+    cin.ignore();
+    cout << "New name: ";
+    getline(cin, list[num - 1].name);
+
+    cout << "New watts: ";
+    cin >> list[num - 1].watts;
+
+    cout << "New hours per day: ";
+    cin >> list[num - 1].hours;
+
+    saveFile(list, count);
+
+    cout << "Appliance updated.\n";
+}
+
 int main() {
     Appliance list[MAX];
     int count = 0;
@@ -134,7 +165,8 @@ int main() {
         cout << "1. Add Appliance\n";
         cout << "2. View Appliances\n";
         cout << "3. Delete Appliance\n";
-        cout << "4. Exit\n";
+        cout << "4. Edit Appliance\n";
+        cout << "5. Exit\n";
         cout << "Choose: ";
         cin >> option;
 
@@ -145,11 +177,13 @@ int main() {
         else if (option == 3)
             deleteAppliance(list, count);
         else if (option == 4)
+            editAppliance(list, count);
+        else if (option == 5)
             cout << "Goodbye.\n";
         else
             cout << "Invalid option.\n";
 
-    } while (option != 4);
+    } while (option != 5);
 
     return 0;
 }
